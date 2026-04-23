@@ -11,7 +11,7 @@
 
   <script src="https://unpkg.com/lucide@0.487.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <style>
     /* ── Página contacto ── */
@@ -286,6 +286,33 @@
       transform: translateY(-2px);
     }
     .form-submit:active { transform: translateY(0); }
+    .form-submit.is-loading {
+      opacity: 0.8;
+      cursor: wait;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .form-status {
+      display: none;
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .form-status.visible { display: block; }
+    .form-status.info {
+      background: rgba(45,106,79,0.14);
+      border: 1px solid rgba(45,106,79,0.4);
+      color: rgba(245,245,245,0.82);
+    }
+    .form-status.error {
+      background: rgba(155,29,42,0.14);
+      border: 1px solid rgba(155,29,42,0.4);
+      color: rgba(245,245,245,0.9);
+    }
 
     /* Mensaje de confirmación (oculto por defecto) */
     .form-success {
@@ -345,7 +372,7 @@
     <div class="nav-inner">
       <a href="index.html" class="nav-logo">
         <div class="nav-logo-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 44" width="28" height="20" fill="#000"><ellipse cx="44" cy="6" rx="2.5" ry="12" transform="rotate(22 44 6)"/><ellipse cx="49" cy="5" rx="2" ry="10" transform="rotate(12 49 5)"/><circle cx="52" cy="19" r="6"/><ellipse cx="31" cy="26" rx="19" ry="9"/><circle cx="11" cy="23" r="3.5"/><ellipse cx="46" cy="36" rx="2.5" ry="9" transform="rotate(25 46 36)"/><ellipse cx="41" cy="37" rx="2" ry="8" transform="rotate(35 41 37)"/><ellipse cx="19" cy="34" rx="2.5" ry="10" transform="rotate(-35 19 34)"/><ellipse cx="25" cy="35" rx="2" ry="9" transform="rotate(-20 25 35)"/></svg>
+          <img src="media/laliebrelogo.png" alt="La Liebre logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
         </div>
         <div class="nav-logo-text">
           <div class="nav-logo-name">LA LIEBRE</div>
@@ -444,7 +471,9 @@
         <div class="contact-badge">RESPUESTA EN 24H</div>
 
         <!-- Formulario visible -->
-        <form id="contact-form" novalidate>
+        <form id="contact-form" action="https://formspree.io/f/TU_FORM_ID" method="POST" novalidate>
+
+          <input type="hidden" name="_subject" value="Nuevo contacto desde La Liebre" />
 
           <div class="form-row">
             <div class="form-group">
@@ -496,6 +525,10 @@
             ENVIAR MENSAJE
           </button>
 
+          <div class="form-status info visible" id="form-status">
+            El formulario ya está preparado para Formspree. Solo faltará sustituir <strong>TU_FORM_ID</strong> por tu identificador cuando conectes el email.
+          </div>
+
         </form>
 
         <!-- Confirmación -->
@@ -535,15 +568,60 @@
     // Lucide icons
     lucide.createIcons();
 
-    // Form submit
-    document.getElementById('contact-form').addEventListener('submit', function(e) {
+    // Form submit (preparado para Formspree)
+    const contactForm = document.getElementById('contact-form');
+    const formSuccess = document.getElementById('form-success');
+    const formStatus = document.getElementById('form-status');
+    const formSubmitBtn = contactForm.querySelector('.form-submit');
+    const formSubmitDefault = formSubmitBtn.innerHTML;
+
+    const setFormStatus = (message, type = 'info') => {
+      formStatus.className = `form-status ${type} visible`;
+      formStatus.innerHTML = message;
+    };
+
+    contactForm.addEventListener('submit', async function(e) {
       e.preventDefault();
+
       if (!this.checkValidity()) {
         this.reportValidity();
         return;
       }
-      this.style.display = 'none';
-      document.getElementById('form-success').classList.add('visible');
+
+      const endpoint = this.getAttribute('action') || '';
+      if (!endpoint || endpoint.includes('TU_FORM_ID')) {
+        setFormStatus('Formulario listo para Formspree. Cuando tengas tu cuenta, sustituye <strong>TU_FORM_ID</strong> por el identificador real del formulario.', 'info');
+        return;
+      }
+
+      try {
+        formSubmitBtn.disabled = true;
+        formSubmitBtn.classList.add('is-loading');
+        formSubmitBtn.innerHTML = 'ENVIANDO...';
+        setFormStatus('Enviando tu mensaje...', 'info');
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: new FormData(this),
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('No se pudo enviar el formulario.');
+        }
+
+        this.reset();
+        this.style.display = 'none';
+        formSuccess.classList.add('visible');
+      } catch (error) {
+        setFormStatus('No se ha podido enviar el mensaje ahora mismo. Inténtalo de nuevo en unos minutos.', 'error');
+      } finally {
+        formSubmitBtn.disabled = false;
+        formSubmitBtn.classList.remove('is-loading');
+        formSubmitBtn.innerHTML = formSubmitDefault;
+      }
     });
   </script>
 </body>

@@ -231,6 +231,7 @@ document.querySelectorAll('.magnetic-btn').forEach((btn) => {
 -------------------------------------------------- */
 const heroSection   = document.getElementById('hero');
 const heroImageWrap = document.getElementById('hero-image-wrap');
+const heroImg       = document.getElementById('hero-img');
 const heroBgText    = document.getElementById('hero-bg-text');
 const heroContentEl = heroSection.querySelector('.hero-content');
 
@@ -240,13 +241,13 @@ window.addEventListener('scroll', () => {
   const progress = Math.min(scrollY / heroH, 1);
 
   // Parallax imagen (se mueve hacia abajo más lento que el scroll)
-  if (heroImageWrap) {
-    heroImageWrap.style.transform = `translateY(${scrollY * 0.4}px)`;
+  if (heroImg) {
+    heroImg.style.transform = `translateY(${scrollY * 0.1}px) scale(1.08)`;
   }
 
   // Fade del contenido al hacer scroll
   if (heroContentEl) {
-    heroContentEl.style.opacity = Math.max(0, 1 - progress / 0.7).toFixed(3);
+    heroContentEl.style.opacity = Math.max(0, 1 - Math.max(0, progress - 0.12) / 1.2).toFixed(3);
   }
 
   // Rotación del texto gigante de fondo
