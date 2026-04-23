@@ -472,6 +472,16 @@ section { position:relative; overflow:hidden }
   letter-spacing:-0.05em; font-weight:900;
   line-height:.75; color:var(--foreground);
 }
+.section-intro {
+  margin-top:28px;
+  max-width:640px;
+  font-size:clamp(1rem,1.5vw,1.15rem);
+  line-height:1.7;
+  color:#9ca3af;
+}
+.section-intro strong {
+  color:var(--foreground);
+}
 .text-gradient {
   background:linear-gradient(to right, var(--primary), #3a7a5c, #ffd60a);
   -webkit-background-clip:text; background-clip:text; color:transparent;
@@ -820,8 +830,8 @@ footer {
 @media(min-width:1024px) { .trainer-profile { grid-template-columns:1fr 2fr; gap:80px } }
 
 .trainer-photo {
-  position:relative; aspect-ratio:3/4;
-  max-width:360px; margin:0 auto;
+  position:relative; aspect-ratio:1/1;
+  max-width:280px; margin:0 auto;
 }
 .trainer-photo-placeholder {
   width:100%; height:100%;
@@ -834,7 +844,7 @@ footer {
   font-weight:700; letter-spacing:0.3em; color:rgba(255,255,255,0.25);
 }
 .trainer-photo img {
-  width:100%; height:100%; object-fit:cover; border-radius:24px;
+  width:100%; height:100%; object-fit:cover; border-radius:48px;
 }
 .trainer-photo-badge {
   position:absolute; bottom:-20px; right:-20px;
